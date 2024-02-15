@@ -4346,7 +4346,7 @@ class AnalysisObj:
         return df_row
 
     def analysis(self, octfile, name, frontscan, backscan,
-                 plotflag=False, accuracy='low', RGB=False):
+                 plotflag=False, accuracy='low', RGB=False, isSave=True):
         """
         General analysis function, where linepts are passed in for calling the
         raytrace routine :py:class:`~bifacial_radiance.AnalysisObj._irrPlot` 
@@ -4393,17 +4393,20 @@ class AnalysisObj:
         backDict = self._irrPlot(octfile, linepts, name+'_Back',
                                    plotflag=plotflag, accuracy=accuracy)
         # don't save if _irrPlot returns an empty file.
-        if frontDict is not None:
-            if len(frontDict['Wm2']) != len(backDict['Wm2']):
-                self.Wm2Front = np.mean(frontDict['Wm2'])
-                self.Wm2Back = np.mean(backDict['Wm2'])
-                self.backRatio = self.Wm2Back / (self.Wm2Front + .001)
-                self._saveResults(frontDict, reardata=None, savefile='irr_%s.csv'%(name+'_Front'), RGB=RGB)
-                self._saveResults(data=None, reardata=backDict, savefile='irr_%s.csv'%(name+'_Back'), RGB=RGB)
-            else:
-                self._saveResults(frontDict, backDict,'irr_%s.csv'%(name), RGB=RGB)
+        if isSave: 
+            if frontDict is not None:
+                if len(frontDict['Wm2']) != len(backDict['Wm2']):
+                    self.Wm2Front = np.mean(frontDict['Wm2'])
+                    self.Wm2Back = np.mean(backDict['Wm2'])
+                    self.backRatio = self.Wm2Back / (self.Wm2Front + .001)
+                    self._saveResults(frontDict, reardata=None, savefile='irr_%s.csv'%(name+'_Front'), RGB=RGB)
+                    self._saveResults(data=None, reardata=backDict, savefile='irr_%s.csv'%(name+'_Back'), RGB=RGB)
+                else:
+                    self._saveResults(frontDict, backDict,'irr_%s.csv'%(name), RGB=RGB)
 
         return frontDict, backDict
+
+        
 
 
 def quickExample(testfolder=None):
