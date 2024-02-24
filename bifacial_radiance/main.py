@@ -3819,7 +3819,18 @@ class AnalysisObj:
 
         return(out)
 
-    def _saveResults(self, data=None, reardata=None, savefile=None, RGB = False):
+    def rename(self,dictionary_new,variable_key):
+        new_dict={}
+        for key, value in dictionary_new.items():
+            new_key=key+variable_key
+            new_dict[new_key]=value
+        return new_dict
+        
+        
+    def _appendResult(self, data=None, reardata=None, savefile=None, RGB = False, scene=None):
+        self._saveResults(data, reardata, savefile, RGB, isAppend=True, scene=scene)
+
+    def _saveResults(self, data=None, reardata=None, savefile=None, RGB = False, scene=None, isAppend=False):
         """
         Function to save output from _irrPlot
         If rearvals is passed in, back ratio is saved
@@ -3874,8 +3885,16 @@ class AnalysisObj:
             setattr(self, col, list(df[col]))    
         # only save a subset
         df = df.drop(columns=['rearX','rearY','backRatio'], errors='ignore')
-        df.to_csv(os.path.join("results", savefile), sep = ',',
-                           index = False)
+        if(scene):
+            data_renamed=self.rename(data,'_front')
+            reardata_renamed=self.rename(reardata,'_back')
+            df = pd.DataFrame({**data_renamed, **reardata_renamed, **scene.sceneDict})
+        if(isAppend):
+            df.to_csv(os.path.join("results", savefile), sep = ',',
+                            index = False, mode='a', header=None)
+        else:
+            df.to_csv(os.path.join("results", savefile), sep = ',',
+                            index = False)
 
 
         print('Saved: %s'%(os.path.join("results", savefile)))
